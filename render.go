@@ -14,6 +14,7 @@ type winsize struct {
 	ws_col uint16
 }
 
+// The options passed to the Shader rendering logic
 type options struct {
 	AnsiMode  *bool
 	Framerate *int
@@ -21,14 +22,17 @@ type options struct {
 
 var opts = options{}
 
+// Defines if it should use true color or ANSI color codes.
 func SetAnsiMode(mode bool) {
 	opts.AnsiMode = &mode
 }
 
+// Sets the amount of nanoseconds to wait before the shader gets re-rendered.
 func SetFramerate(duration int) {
 	opts.Framerate = &duration
 }
 
+// Retrieves the current terminal size (width and height in characters).
 func getTerminalSize() (width, height int) {
 	ws := &winsize{}
 	retCode, _, errno := syscall.Syscall(
@@ -45,6 +49,7 @@ func getTerminalSize() (width, height int) {
 	return int(ws.ws_col), int(ws.ws_row)
 }
 
+// Maps RGB color values to a terminal color string, using either true color or ANSI codes.
 func mapColor(r, g, b float64, useTrueColor bool) string {
 	if useTrueColor {
 		return fmt.Sprintf("\x1b[38;2;%d;%d;%dm█", int(r*255), int(g*255), int(b*255))
@@ -53,7 +58,8 @@ func mapColor(r, g, b float64, useTrueColor bool) string {
 	return fmt.Sprintf("\x1b[38;5;%dm█", 16+int(r*5)*36+int(g*5)*6+int(b*5))
 }
 
-func Run(shaderName string) {
+// Renders the shader based on its name, the framerate, the size of the window and color type
+func Render(shaderName string) {
 	width, height := getTerminalSize()
 	fmt.Print("\033[H\033[2J")
 
